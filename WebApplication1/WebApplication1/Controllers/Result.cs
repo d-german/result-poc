@@ -10,12 +10,30 @@ public abstract record Result<T>
 {
     public required string SourceId { get; init; } = string.Empty;
     public required HttpStatusCode StatusCode { get; init; } = OK;
-    public string CallerMemberName { get; init; } = string.Empty;
+    public required string CallerMemberName { get; init; } = string.Empty;
 }
 
 public record SuccessResult<T> : Result<T>
 {
     public required T Value { get; init; }
+
+    private SuccessResult()
+    {
+        // Private constructor to prevent external instantiation
+    }
+
+    public static SuccessResult<T> Create(
+        (string SourceId, HttpStatusCode StatusCode, T Value) successParams,
+        [CallerMemberName]
+        string callerMemberName = "")
+    {
+        return new SuccessResult<T> {
+            SourceId = successParams.SourceId,
+            StatusCode = successParams.StatusCode,
+            Value = successParams.Value,
+            CallerMemberName = callerMemberName
+        };
+    }
 }
 
 public record ProblemDetailsResult<T> : Result<T>
@@ -26,23 +44,6 @@ public record ProblemDetailsResult<T> : Result<T>
     private ProblemDetailsResult()
     {
         // Private constructor to prevent external instantiation
-    }
-    
-    public static ProblemDetailsResult<T> Create(
-        (string SourceId, HttpStatusCode StatusCode) requiredParams,
-        ProblemDetails problemDetails,
-        [CallerMemberName]
-        string context = "")
-    {
-        problemDetails.Extensions["SourceId"] = requiredParams.SourceId;
-        problemDetails.Extensions["Context"] = context;
-        
-        return new ProblemDetailsResult<T> {
-            StatusCode = requiredParams.StatusCode,
-            ProblemDetails = problemDetails,
-            SourceId = requiredParams.SourceId,
-            CallerMemberName = context
-        };
     }
     
     public static ProblemDetailsResult<T> Create(
@@ -62,6 +63,24 @@ public record ProblemDetailsResult<T> : Result<T>
     }
 }
 
-public record EmptyContentResult : Result<EmptyContent>;
+public record EmptyContentResult : Result<EmptyContent>
+{
+    private EmptyContentResult()
+    {
+        // Private constructor to prevent external instantiation
+    }
+
+    public static EmptyContentResult Create(
+        (string SourceId, HttpStatusCode StatusCode) emptyContentParams,
+        [CallerMemberName]
+        string callerMemberName = "")
+    {
+        return new EmptyContentResult {
+            SourceId = emptyContentParams.SourceId,
+            StatusCode = emptyContentParams.StatusCode,
+            CallerMemberName = callerMemberName
+        };
+    }
+}
 
 public record EmptyContent;
