@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Hyland.Healthcare.Shared.Types.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace WebApplication1.Controllers;
 
@@ -10,10 +11,6 @@ public static class ResultExtensions
         {
             SuccessResult<T> successResult => new OkObjectResult(successResult.Value),
             EmptyContentResult => new NoContentResult(),
-            ExceptionResult<T> exceptionResult => new ObjectResult(exceptionResult.Exception)
-            {
-                StatusCode = (int)exceptionResult.StatusCode
-            },
             ProblemDetailsResult<T> problemDetailsResult => new ObjectResult(problemDetailsResult.ProblemDetails)
             {
                 StatusCode = (int)problemDetailsResult.StatusCode

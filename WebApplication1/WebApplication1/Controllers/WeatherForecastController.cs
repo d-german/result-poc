@@ -1,4 +1,5 @@
 using System.Net;
+using Hyland.Healthcare.Shared.Types.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApplication1.Controllers;
@@ -22,11 +23,11 @@ public class WeatherForecastController : ControllerBase
     [HttpGet(Name = "GetWeatherForecast")]
     public IActionResult Get()
     {
-        var weatherForecastsResult = WeatherForecastsResult();
+        var weatherForecastsResult = WeatherForecastsProblemDetailsTupleResult();
         return weatherForecastsResult.ToActionResult();
     }
     
-    private static Result<IEnumerable<WeatherForecast>> WeatherForecastsResult()
+    private static Result<IEnumerable<WeatherForecast>> WeatherForecastsSuccessResult()
     {
         return new SuccessResult<IEnumerable<WeatherForecast>>
         {
@@ -41,5 +42,30 @@ public class WeatherForecastController : ControllerBase
                 })
                 .ToArray()
         };
+    }
+    
+    private static Result<IEnumerable<WeatherForecast>> WeatherForecastsProblemDetailsResult()
+    {
+        return ProblemDetailsResult<IEnumerable<WeatherForecast>>.Create(
+            sourceId: "WeatherForecastController",
+            statusCode: HttpStatusCode.InternalServerError,
+            problemDetails: new ProblemDetails
+            {
+                Title = "An unexpected error occurred.",
+                Detail = "An unexpected error occurred while processing the request.",
+                Status = (int)HttpStatusCode.InternalServerError
+            });
+    }
+    
+    private static Result<IEnumerable<WeatherForecast>> WeatherForecastsProblemDetailsTupleResult()
+    {
+        return ProblemDetailsResult<IEnumerable<WeatherForecast>>.Create(
+            (SourceId: "WeatherForecastController", StatusCode: HttpStatusCode.InternalServerError),
+            problemDetails: new ProblemDetails
+            {
+                Title = "An unexpected error occurred.",
+                Detail = "An unexpected error occurred while processing the request.",
+                Status = (int)HttpStatusCode.InternalServerError
+            });
     }
 }
